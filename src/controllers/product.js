@@ -137,13 +137,49 @@ export async function listProducts(req, res) {
 }
 
 export async function selectProduct(req, res) {
+  const userId = req.user.id
   const { id } = req.params
 
-  const product = await prisma.product.update({
+  const product = await prisma.product.findUnique({ where: { id } })
+
+  if (!product || !product.is_active) {
+    return res.status(400).json({ error: 'Presente indisponível' })
+  }
+
+  const updated = await prisma.product.update({
     where: { id },
     data: {
-      is_active: false
+      is_active: false,
+      selected_by_id: userId,
+      selected_at: new Date()
     }
   })
 
-  return res.json(product)}
+  res.json(updated)
+}
+
+export async function unselectProduct(req, res) {
+  const userId = req.user.id
+  const { id } = req.params
+
+  const product = await prisma.product.findUnique({ where: { id } })
+
+  if (!product) {
+    return res.status(404).json({ error: 'Produto não encontrado' })
+  }
+
+  if (product.selected_by_id !== userId) {
+    return res.status(403).json({ error: 'Ação não permitida' })
+  }
+
+  const updated = await prisma.product.update({
+    where: { id },
+    data: {
+      is_active: true,
+      selected_by_id: null,
+      selected_at: null
+    }
+  })
+
+  res.json(updated)
+}

@@ -15,6 +15,7 @@ model Product {
   link_shopee      String
   category_product Category
   is_active        Boolean  @default(true)
+  selected_by_id   String?
   created_at       DateTime @default(now())
 
 }
