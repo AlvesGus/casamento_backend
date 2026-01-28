@@ -135,3 +135,15 @@ export async function listProducts(req, res) {
     return res.status(500).json({ error: 'Erro ao buscar produtos' })
   }
 }
+
+export async function selectProduct(req, res) {
+  const { id } = req.params
+
+  const product = await prisma.product.update({
+    where: { id },
+    data: {
+      is_active: false
+    }
+  })
+
+  return res.json(product)}

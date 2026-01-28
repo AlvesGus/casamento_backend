@@ -3,7 +3,8 @@ import { upload } from '../middleware/upload.js'
 import {
   createProduct,
   listProducts,
-  deleteProduct
+  deleteProduct,
+  selectProduct
 } from '../controllers/product.js'
 
 const routes = express.Router()
@@ -11,6 +12,7 @@ const routes = express.Router()
 routes.post('/products', upload.single('image'), createProduct)
 routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
+routes.patch('/products/:id/select', selectProduct)
 
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
