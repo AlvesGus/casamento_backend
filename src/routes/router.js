@@ -9,7 +9,7 @@ import {
 const routes = express.Router()
 
 routes.post('/products', upload.single('image'), createProduct)
-routes.get('/products', listProducts)
+routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 
 routes.get('/health', (req, res) => {
