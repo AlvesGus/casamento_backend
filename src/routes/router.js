@@ -2,14 +2,14 @@ import express from 'express'
 import { upload } from '../middleware/upload.js'
 import {
   createProduct,
-  deleteProduct,
-  listProducts
+  listProducts,
+  deleteProduct
 } from '../controllers/product.js'
 
 const routes = express.Router()
 
 routes.post('/products', upload.single('image'), createProduct)
-routes.get('/list-products', listProducts)
+routes.get('/products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 
 routes.get('/health', (req, res) => {
