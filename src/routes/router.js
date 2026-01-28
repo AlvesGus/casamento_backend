@@ -13,8 +13,8 @@ const routes = express.Router()
 routes.post('/products', upload.single('image'), createProduct)
 routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
-routes.patch('/products/:id/select', auth, selectProduct)
-routes.patch('/products/:id/unselect', auth, unselectProduct)
+routes.patch('/products/:id/select',  selectProduct)
+routes.patch('/products/:id/unselect',  unselectProduct)
 
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
