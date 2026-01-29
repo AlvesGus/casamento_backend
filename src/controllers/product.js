@@ -144,49 +144,84 @@ export async function listProducts(req, res) {
 }
 
 export async function selectProduct(req, res) {
-  const userId = req.user.id
-  const { id } = req.params
+  try {
+    const userId = req.user.id
+    const { id } = req.params
 
-  const product = await prisma.product.findUnique({ where: { id } })
+    const product = await prisma.product.findUnique({
+      where: { id }
+    })
 
-  if (!product || !product.is_active) {
-    return res.status(400).json({ error: 'Presente indisponível' })
-  }
-
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      is_active: false,
-      selected_by_id: userId,
-      selected_at: new Date()
+    if (!product || !product.is_active) {
+      return res.status(400).json({ error: 'Presente indisponível' })
     }
-  })
 
-  res.json(updated)
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        is_active: false,
+        selected_by_id: userId,
+        selected_at: new Date()
+      }
+    })
+
+    res.json(updated)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ error: 'Erro ao selecionar presente' })
+  }
+}
+
+export async function myPresents(req, res) {
+  try {
+    const userId = req.user.id
+
+    const products = await prisma.product.findMany({
+      where: {
+        selected_by_id: userId
+      },
+      orderBy: {
+        selected_at: 'desc'
+      }
+    })
+
+    return res.json({ data: products })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Erro ao buscar presentes' })
+  }
 }
 
 export async function unselectProduct(req, res) {
-  const userId = req.user.id
-  const { id } = req.params
+  try {
+    const userId = req.user.id
+    const { id } = req.params
 
-  const product = await prisma.product.findUnique({ where: { id } })
+    const product = await prisma.product.findUnique({
+      where: { id }
+    })
 
-  if (!product) {
-    return res.status(404).json({ error: 'Produto não encontrado' })
-  }
-
-  if (product.selected_by_id !== userId) {
-    return res.status(403).json({ error: 'Ação não permitida' })
-  }
-
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      is_active: true,
-      selected_by_id: null,
-      selected_at: null
+    if (!product) {
+      return res.status(404).json({ error: 'Produto não encontrado' })
     }
-  })
 
-  res.json(updated)
+    // 🔒 só quem selecionou pode remover
+    if (product.selected_by_id !== userId) {
+      return res.status(403).json({ error: 'Ação não permitida' })
+    }
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        is_active: true,
+        selected_by_id: null,
+        selected_at: null
+      }
+    })
+
+    return res.json(updated)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Erro ao remover seleção' })
+  }
 }
