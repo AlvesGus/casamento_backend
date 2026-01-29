@@ -4,8 +4,6 @@ import routes from './routes/router.js'
 
 const app = express()
 
-import cors from 'cors'
-
 app.use(
   cors({
     origin: ['http://localhost:3000', 'https://seu-frontend.vercel.app'],
