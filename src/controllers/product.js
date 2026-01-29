@@ -1,9 +1,6 @@
 import { supabase } from '../lib/supabase/supabase.js'
 import { prisma } from '../lib/prisma/prisma.js'
 import crypto from 'crypto'
-import { getShopeeProductData } from '../services/shopee.js'
-
-import crypto from 'crypto'
 import { supabase } from '../lib/supabase/supabase.js'
 import { prisma } from '../lib/prisma/prisma.js'
 import { generateShopeeShortLink } from '../services/shopee.js'
