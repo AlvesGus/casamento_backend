@@ -8,7 +8,6 @@ import {
   unselectProduct,
   createFromShopee
 } from '../controllers/product.js'
-import handler from '../../api/shopee.js'
 
 const routes = express.Router()
 
