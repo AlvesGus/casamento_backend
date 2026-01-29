@@ -17,7 +17,7 @@ routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 routes.patch('/products/:id/select', selectProduct)
 routes.patch('/products/:id/unselect', unselectProduct)
-router.post('/products/from-shopee', createFromShopee)
+routes.post('/products/from-shopee', createFromShopee)
 
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
