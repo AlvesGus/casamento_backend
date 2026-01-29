@@ -4,14 +4,13 @@ import routes from './routes/router.js'
 
 const app = express()
 
+import cors from 'cors'
+
 app.use(
   cors({
-    origin: [
-      'http://localhost:3000',
-      'https://seu-front-em-producao.vercel.app'
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
+    origin: ['http://localhost:3000', 'https://seu-frontend.vercel.app'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 )
 
