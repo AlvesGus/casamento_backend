@@ -158,7 +158,9 @@ export async function selectProduct(req, res) {
       where: { id },
       data: {
         is_active: false,
-        selected_by_id: userId,
+        selected_by: {
+          connect: { id: userId } // conecta o usuário ao produto
+        },
         selected_at: new Date()
       }
     })
@@ -212,7 +214,9 @@ export async function unselectProduct(req, res) {
       where: { id },
       data: {
         is_active: true,
-        selected_by_id: null,
+        selected_by: {
+          disconnect: true // remove a relação
+        },
         selected_at: null
       }
     })
