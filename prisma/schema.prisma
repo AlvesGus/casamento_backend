@@ -15,9 +15,16 @@ model Product {
   link_shopee      String
   category_product Category
   is_active        Boolean  @default(true)
-  selected_by_id   String?
+  selected_by_id String?
+  selected_by    User?    @relation(fields: [selected_by_id], references: [id])
   created_at       DateTime @default(now())
 
+}
+
+model User {
+  id        String    @id
+  email     String?
+  products  Product[]
 }
 
 enum Category {
@@ -27,3 +34,4 @@ enum Category {
   Banheiro
   Outros
 }
+
