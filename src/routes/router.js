@@ -11,6 +11,16 @@ import {
 import handler from '../../api/shopee.js'
 
 const routes = express.Router()
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'https://seu-front-em-producao.vercel.app'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+  })
+)
 
 routes.post('/products', upload.single('image'), createProduct)
 routes.get('/list-products', listProducts)
