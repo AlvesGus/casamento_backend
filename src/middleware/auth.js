@@ -1,20 +1,19 @@
-export function auth(req, res, next) {
-  const authHeader = req.headers.authorization
+import { createClient } from '@supabase/supabase-js'
 
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Não autenticado' })
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
+
+export async function auth(req, res, next) {
+  const token = req.headers.authorization?.replace('Bearer ', '')
+
+  const { data, error } = await supabase.auth.getUser(token)
+
+  if (error || !data.user) {
+    return res.status(401).json({ error: 'Não autorizado' })
   }
 
-  const [, userId] = authHeader.split(' ')
-
-  if (!userId) {
-    return res.status(401).json({ error: 'Token inválido' })
-  }
-
-  // 🔹 injeta user no request
-  req.user = {
-    id: userId
-  }
-
+  req.user = data.user
   next()
 }
