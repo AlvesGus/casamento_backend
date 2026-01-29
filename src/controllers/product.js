@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase/supabase.js'
 import { prisma } from '../lib/prisma/prisma.js'
 import crypto from 'crypto'
+import { getShopeeProductData } from '../services/shopee.js'
 
 export async function createProduct(req, res) {
   try {
@@ -182,4 +183,27 @@ export async function unselectProduct(req, res) {
   })
 
   res.json(updated)
+}
+
+export async function createFromShopee(req, res) {
+  try {
+    const { url, category } = req.body
+
+    if (!url) {
+      return res.status(400).json({ error: 'URL obrigatória' })
+    }
+
+    const product = await getShopeeProductData(url)
+
+    return res.json({
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      shortLink: product.shortLink,
+      category
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Erro ao importar produto' })
+  }
 }

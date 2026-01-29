@@ -5,7 +5,8 @@ import {
   listProducts,
   deleteProduct,
   selectProduct,
-  unselectProduct
+  unselectProduct,
+  createFromShopee
 } from '../controllers/product.js'
 import handler from '../../api/shopee.js'
 
@@ -16,7 +17,8 @@ routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 routes.patch('/products/:id/select', selectProduct)
 routes.patch('/products/:id/unselect', unselectProduct)
-routes.post('/shopee/product-info', handler)
+router.post('/products/from-shopee', createFromShopee)
+
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
 })
