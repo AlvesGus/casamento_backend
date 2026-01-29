@@ -193,17 +193,21 @@ export async function createFromShopee(req, res) {
       return res.status(400).json({ error: 'URL obrigatória' })
     }
 
-    const product = await getShopeeProductData(url)
+    const productData = await getShopeeProductData(url)
 
-    return res.json({
-      name: product.name,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      shortLink: product.shortLink,
-      category
+    const product = await prisma.product.create({
+      data: {
+        name: productData.name,
+        suggestion_price: productData.price,
+        link_shopee: productData.shortLink,
+        image_url: productData.imageUrl,
+        category_product: category
+      }
     })
+
+    return res.status(201).json(product)
   } catch (error) {
-    console.error(error)
-    return res.status(500).json({ error: 'Erro ao importar produto' })
+    console.error('[from-shopee]', error)
+    return res.status(500).json({ error: error.message })
   }
 }
