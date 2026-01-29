@@ -3,47 +3,58 @@ import { prisma } from '../lib/prisma/prisma.js'
 import crypto from 'crypto'
 import { getShopeeProductData } from '../services/shopee.js'
 
+import crypto from 'crypto'
+import { supabase } from '../lib/supabase/supabase.js'
+import { prisma } from '../lib/prisma/prisma.js'
+import { generateShopeeShortLink } from '../services/shopee.js'
+
 export async function createProduct(req, res) {
   try {
     const { name, suggestion_price, link_shopee, category_product } = req.body
-
     const file = req.file
+
+    if (!name || !suggestion_price || !link_shopee || !category_product) {
+      return res.status(400).json({ error: 'Dados obrigatórios faltando' })
+    }
 
     if (!file) {
       return res.status(400).json({ error: 'Imagem obrigatória' })
     }
 
+    // 🔹 gerar shortLink afiliado
+    const shortLink = await generateShopeeShortLink(link_shopee)
+
+    // 🔹 upload imagem
     const fileName = `img/${crypto.randomUUID()}.jpg`
 
-    const { error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('img')
       .upload(fileName, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false
+        contentType: file.mimetype
       })
 
-    if (error) {
-      return res
-        .status(500)
-        .json({ error: 'Erro ao enviar imagem', details: error.message })
+    if (uploadError) {
+      return res.status(500).json({ error: 'Erro ao enviar imagem' })
     }
 
     const image_url = supabase.storage.from('img').getPublicUrl(fileName)
       .data.publicUrl
 
+    // 🔹 salvar produto
     const product = await prisma.product.create({
       data: {
         name,
         suggestion_price: Number(suggestion_price),
         image_url,
-        link_shopee,
+        link_shopee: shortLink,
         category_product
       }
     })
 
     return res.status(201).json(product)
   } catch (error) {
-    console.log(error)
+    console.error('createProduct error:', error)
+    return res.status(500).json({ error: 'Erro ao criar produto' })
   }
 }
 
@@ -183,31 +194,4 @@ export async function unselectProduct(req, res) {
   })
 
   res.json(updated)
-}
-
-export async function createFromShopee(req, res) {
-  try {
-    const { url, category } = req.body
-
-    if (!url) {
-      return res.status(400).json({ error: 'URL obrigatória' })
-    }
-
-    const productData = await getShopeeProductData(url)
-
-    const product = await prisma.product.create({
-      data: {
-        name: productData.name,
-        suggestion_price: productData.price,
-        link_shopee: productData.shortLink,
-        image_url: productData.imageUrl,
-        category_product: category
-      }
-    })
-
-    return res.status(201).json(product)
-  } catch (error) {
-    console.error('[from-shopee]', error)
-    return res.status(500).json({ error: error.message })
-  }
 }

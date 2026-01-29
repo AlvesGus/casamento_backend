@@ -1,19 +1,47 @@
-import { generateShopeeShortLink } from './shopeeAffiliate.js'
+import crypto from 'crypto'
+import fetch from 'node-fetch'
 
-export async function getShopeeProductData(url) {
-  // Validação básica
-  if (!url.includes('shopee')) {
-    throw new Error('Link não parece Shopee válido')
+const API_URL = 'https://open-api.affiliate.shopee.com.br/graphql'
+
+export async function generateShopeeShortLink(originUrl) {
+  const appId = process.env.SHOPEE_APP_ID
+  const secret = process.env.SHOPEE_SECRET
+
+  const timestamp = Math.floor(Date.now() / 1000).toString()
+
+  const payload = JSON.stringify({
+    query: `
+      mutation {
+        generateShortLink(
+          input: {
+            originUrl: "${originUrl}"
+          }
+        ) {
+          shortLink
+        }
+      }
+    `
+  })
+
+  const signature = crypto
+    .createHash('sha256')
+    .update(appId + timestamp + payload + secret)
+    .digest('hex')
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `SHA256 Credential=${appId}, Signature=${signature}, Timestamp=${timestamp}`
+    },
+    body: payload
+  })
+
+  const json = await response.json()
+
+  if (!json?.data?.generateShortLink?.shortLink) {
+    throw new Error('Erro ao gerar shortLink Shopee')
   }
 
-  const shortLink = await generateShopeeShortLink(url)
-
-  // Obs: a API Affiliate não retorna nome/imagem/preço
-  // Você pode expandir isso depois (via scraping ou outro endpoint)
-  return {
-    name: 'Produto Shopee', // você pode permitir override manual
-    imageUrl: '', // adicionar se quiser scrape
-    price: 0, // adicionar lógica de preço se necessário
-    shortLink
-  }
+  return json.data.generateShortLink.shortLink
 }
