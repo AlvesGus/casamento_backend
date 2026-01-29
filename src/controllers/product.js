@@ -154,13 +154,17 @@ export async function selectProduct(req, res) {
       return res.status(400).json({ error: 'Indisponível' })
     }
 
+    await prisma.user.upsert({
+      where: { id: userId },
+      update: {},
+      create: { id: userId }
+    })
+
     const updated = await prisma.product.update({
       where: { id },
       data: {
         is_active: false,
-        selected_by: {
-          connect: { id: userId } // conecta o usuário ao produto
-        },
+        selected_by: { connect: { id: userId } },
         selected_at: new Date()
       }
     })
