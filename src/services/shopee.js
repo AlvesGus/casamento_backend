@@ -1,98 +1,54 @@
-import { extractShopeeIds } from '../utils/shopee.js'
+import crypto from 'crypto'
 
-const SHOPEE_GRAPHQL = 'https://open-api.affiliate.shopee.com.br/graphql'
+const SHOPEE_API_URL = 'https://open-api.affiliate.shopee.com.br/graphql'
+const APP_ID = process.env.SHOPEE_APP_ID
+const SECRET = process.env.SHOPEE_SECRET
 
-const SHOPEE_PRODUCT_API =
-  'https://open-api.affiliate.shopee.com.br/product/get'
+function generateAuthorization(payload) {
+  const timestamp = Math.floor(Date.now() / 1000)
 
-export async function getShopeeProductData(url) {
-  // 1️⃣ valida URL
-  if (!url || typeof url !== 'string') {
-    throw new Error('URL inválida')
-  }
+  const baseString = APP_ID + timestamp + JSON.stringify(payload) + SECRET
 
-  // 2️⃣ extrai IDs
-  const ids = extractShopeeIds(url)
-  if (!ids) {
-    throw new Error('Link Shopee inválido')
-  }
-
-  // 3️⃣ valida token
-  if (!process.env.SHOPEE_AUTH) {
-    throw new Error('SHOPEE_AUTH não configurado')
-  }
-
-  // 4️⃣ gera shortLink
-  const shortLink = await generateShopeeShortLink(url)
-
-  // 5️⃣ busca dados do produto
-  const product = await fetchShopeeProduct(ids.shopId, ids.itemId)
+  const signature = crypto.createHash('sha256').update(baseString).digest('hex')
 
   return {
-    name: product.name,
-    imageUrl: product.imageUrl,
-    price: product.price,
-    shortLink
+    authorization: `SHA256 Credential=${APP_ID}, Signature=${signature}, Timestamp=${timestamp}`,
+    timestamp
   }
 }
 
-async function generateShopeeShortLink(originUrl) {
-  const response = await fetch(SHOPEE_GRAPHQL, {
+export async function generateShopeeShortLink(originalUrl) {
+  const payload = {
+    query: `
+      mutation GenerateShortLink($url: String!) {
+        generateShortLink(url: $url) {
+          shortLink
+        }
+      }
+    `,
+    variables: {
+      url: originalUrl
+    }
+  }
+
+  const { authorization } = generateAuthorization(payload)
+
+  const response = await fetch(SHOPEE_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: process.env.SHOPEE_AUTH
+      Authorization: authorization
     },
-    body: JSON.stringify({
-      query: `
-        mutation {
-          generateShortLink(
-            input: {
-              originUrl: "${originUrl}",
-              subIds: ["wishlist"]
-            }
-          ) {
-            shortLink
-          }
-        }
-      `
-    })
+    body: JSON.stringify(payload)
   })
 
-  const data = await response.json()
-
-  const shortLink = data?.data?.generateShortLink?.shortLink
-
-  if (!shortLink) {
+  if (!response.ok) {
+    const errorText = await response.text()
+    console.error(errorText)
     throw new Error('Erro ao gerar shortLink Shopee')
   }
 
-  return shortLink
-}
-
-async function fetchShopeeProduct(shopId, itemId) {
-  const response = await fetch(SHOPEE_PRODUCT_API, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: process.env.SHOPEE_AUTH
-    },
-    body: JSON.stringify({
-      shop_id: shopId,
-      item_id: itemId
-    })
-  })
-
   const data = await response.json()
-  const item = data?.item
 
-  if (!item) {
-    throw new Error('Produto não encontrado na Shopee')
-  }
-
-  return {
-    name: item.name,
-    imageUrl: item.images?.[0],
-    price: item.price / 100000
-  }
+  return data.data.generateShortLink.shortLink
 }
