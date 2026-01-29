@@ -6,14 +6,29 @@ const supabase = createClient(
 )
 
 export async function auth(req, res, next) {
-  const token = req.headers.authorization?.replace('Bearer ', '')
+  try {
+    const authHeader = req.headers.authorization
+    if (!authHeader) {
+      return res.status(401).json({ error: 'Authorization header missing' })
+    }
 
-  const { data, error } = await supabase.auth.getUser(token)
+    const token = authHeader.replace('Bearer ', '').trim()
+    if (!token) {
+      return res.status(401).json({ error: 'Token não fornecido' })
+    }
 
-  if (error || !data.user) {
-    return res.status(401).json({ error: 'Não autorizado' })
+    // Pega usuário pelo token
+    const { data, error } = await supabase.auth.getUser(token)
+
+    if (error || !data.user) {
+      console.log('Supabase auth error:', error)
+      return res.status(401).json({ error: 'Não autorizado' })
+    }
+
+    req.user = data.user
+    next()
+  } catch (err) {
+    console.error('Erro no middleware auth:', err)
+    return res.status(500).json({ error: 'Erro interno no auth' })
   }
-
-  req.user = data.user
-  next()
 }

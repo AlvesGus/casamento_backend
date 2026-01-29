@@ -144,25 +144,30 @@ export async function listProducts(req, res) {
 }
 
 export async function selectProduct(req, res) {
-  const userId = req.user.id
-  const { id } = req.params
+  try {
+    const userId = req.user.id
+    const { id } = req.params
 
-  const product = await prisma.product.findUnique({ where: { id } })
+    const product = await prisma.product.findUnique({ where: { id } })
 
-  if (!product || !product.is_active) {
-    return res.status(400).json({ error: 'Indisponível' })
-  }
-
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      is_active: false,
-      selected_by_id: userId,
-      selected_at: new Date()
+    if (!product || !product.is_active) {
+      return res.status(400).json({ error: 'Indisponível' })
     }
-  })
 
-  res.json(updated)
+    const updated = await prisma.product.update({
+      where: { id },
+      data: {
+        is_active: false,
+        selected_by_id: userId,
+        selected_at: new Date()
+      }
+    })
+
+    res.json(updated)
+  } catch (err) {
+    console.error('SELECT PRODUCT ERROR:', err)
+    res.status(500).json({ error: 'Erro interno', details: err.message })
+  }
 }
 
 export async function myPresents(req, res) {
