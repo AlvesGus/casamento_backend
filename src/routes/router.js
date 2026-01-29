@@ -5,8 +5,7 @@ import {
   listProducts,
   deleteProduct,
   selectProduct,
-  unselectProduct,
-  createFromShopee
+  unselectProduct
 } from '../controllers/product.js'
 
 const routes = express.Router()
@@ -16,7 +15,6 @@ routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 routes.patch('/products/:id/select', selectProduct)
 routes.patch('/products/:id/unselect', unselectProduct)
-routes.post('/products/from-shopee', createFromShopee)
 
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
