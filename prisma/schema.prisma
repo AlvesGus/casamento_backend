@@ -33,6 +33,7 @@ enum Category {
   Sala
   Ferramentas
   Banheiro
+  Lavanderia
   Outros
 }
 
