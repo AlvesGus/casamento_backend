@@ -96,6 +96,8 @@ export async function deleteProduct(req, res) {
 export async function listProducts(req, res) {
   const { category, max_price, order } = req.query
 
+  const where = {}
+
   const validCategories = [
     'Cozinha',
     'Sala',
