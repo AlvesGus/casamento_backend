@@ -6,7 +6,6 @@ const API_URL = 'https://open-api.affiliate.shopee.com.br/graphql'
 export async function generateShopeeShortLink(originUrl, userId) {
   const appId = process.env.SHOPEE_APP_ID
   const secret = process.env.SHOPEE_SECRET
-  const userId = 'gus&grazi'
 
   const timestamp = Math.floor(Date.now() / 1000).toString()
 
