@@ -3,7 +3,7 @@ import fetch from 'node-fetch'
 
 const API_URL = 'https://open-api.affiliate.shopee.com.br/graphql'
 
-export async function generateShopeeShortLink(originUrl, userId) {
+export async function generateShopeeShortLink(originUrl) {
   const appId = process.env.SHOPEE_APP_ID
   const secret = process.env.SHOPEE_SECRET
 
@@ -40,7 +40,6 @@ export async function generateShopeeShortLink(originUrl, userId) {
   const json = await response.json()
 
   if (!json?.data?.generateShortLink?.shortLink) {
-    console.error(json)
     throw new Error('Erro ao gerar shortLink Shopee')
   }
 
