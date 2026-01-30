@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase.js'
+import { supabase } from '../lib/supabase/supabase.js'
 
 export async function auth(req, res, next) {
   try {
