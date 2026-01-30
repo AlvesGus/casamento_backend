@@ -13,8 +13,6 @@ app.use(
   })
 )
 
-app.options('*', cors()) // preflight
-
 app.use(express.json())
 app.use('/api', routes)
 
