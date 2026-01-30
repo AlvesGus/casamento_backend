@@ -9,6 +9,7 @@ import {
   myPresents
 } from '../controllers/product.js'
 import { auth } from '../middleware/auth.js'
+import { ensureAuth } from '../middleware/ensure.js'
 
 const routes = express.Router()
 
@@ -17,7 +18,7 @@ routes.get('/list-products', listProducts)
 routes.delete('/products/:id', deleteProduct)
 routes.patch('/products/:id/select', auth, selectProduct)
 routes.patch('/products/:id/unselect', auth, unselectProduct)
-routes.get('/my-presents', auth, myPresents)
+routes.get('/my-presents', ensureAuth, myPresents)
 
 routes.get('/health', (req, res) => {
   res.status(200).json({ message: 'Server is healthy' })
