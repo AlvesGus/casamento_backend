@@ -15,7 +15,7 @@ export async function generateShopeeShortLink(originUrl, userId) {
         generateShortLink(
           input: {
             originUrl: "${originUrl}"
-            subIds: ["${userId}", "gusegrazi"]
+            subIds: ["${userId}"]
           }
         ) {
           shortLink
