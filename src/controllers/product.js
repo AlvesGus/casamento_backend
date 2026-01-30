@@ -109,10 +109,6 @@ export async function listProducts(req, res) {
   }
 
   try {
-    const where = {
-      is_active: true
-    }
-
     // filtro por categoria
     if (category) {
       where.category_product = category
