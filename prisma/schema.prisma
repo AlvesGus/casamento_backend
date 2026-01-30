@@ -34,6 +34,7 @@ enum Category {
   Ferramentas
   Banheiro
   Lavanderia
+  Quarto
   Outros
 }
 
