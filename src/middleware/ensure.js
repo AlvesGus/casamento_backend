@@ -16,5 +16,21 @@ export async function ensureAuth(req, res, next) {
   }
 
   req.user = data.user
+  await ensureUserExists(data.user)
   next()
+}
+
+async function ensureUserExists(supabaseUser) {
+  const user = await prisma.user.findUnique({
+    where: { id: supabaseUser.id }
+  })
+
+  if (!user) {
+    await prisma.user.create({
+      data: {
+        id: supabaseUser.id,
+        email: supabaseUser.email
+      }
+    })
+  }
 }
