@@ -146,31 +146,34 @@ export async function selectProduct(req, res) {
     const userId = req.user.id
     const { id } = req.params
 
-    const product = await prisma.product.findUnique({ where: { id } })
-
-    if (!product || !product.is_active) {
-      return res.status(400).json({ error: 'Indisponível' })
-    }
-
     await prisma.user.upsert({
       where: { id: userId },
       update: {},
       create: { id: userId }
     })
 
-    const updated = await prisma.product.update({
-      where: { id },
+    const result = await prisma.product.updateMany({
+      where: {
+        id,
+        is_active: true
+      },
       data: {
         is_active: false,
-        selected_by: { connect: { id: userId } },
+        selected_by_id: userId,
         selected_at: new Date()
       }
     })
 
-    res.json(updated)
+    if (result.count === 0) {
+      return res.status(409).json({
+        error: 'Esse presente já foi escolhido'
+      })
+    }
+
+    return res.json({ success: true })
   } catch (err) {
     console.error('SELECT PRODUCT ERROR:', err)
-    res.status(500).json({ error: 'Erro interno', details: err.message })
+    return res.status(500).json({ error: 'Erro interno' })
   }
 }
 
