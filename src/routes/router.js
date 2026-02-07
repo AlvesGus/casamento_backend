@@ -9,7 +9,6 @@ import {
   myPresents
 } from '../controllers/product.js'
 import { auth } from '../middleware/auth.js'
-import { ensureAuth } from '../middleware/ensure.js'
 
 const routes = express.Router()
 
