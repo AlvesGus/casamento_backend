@@ -179,6 +179,8 @@ export async function selectProduct(req, res) {
 
 export async function myPresents(req, res) {
   try {
+    res.setHeader('Cache-Control', 'no-store')
+
     const userId = req.user.id
 
     const products = await prisma.product.findMany({
